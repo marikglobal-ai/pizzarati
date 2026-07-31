@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --background: #090909;
+  --surface: #141414;
+  --gold: #c8a95b;
+  --gold-light: #f0d38a;
+  --text: #ffffff;
+  --muted: #9b9b9b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--text);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  font-family: var(--font-inter);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-title);
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(200,169,91,.12), transparent 40%),
+    #090909;
+}
