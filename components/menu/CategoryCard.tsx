@@ -3,19 +3,19 @@ import type { LucideIcon } from 'lucide-react'
 type CategoryCardProps = {
   name: string
   items: number
+  itemsLabel: string
   icon: LucideIcon
   active?: boolean
 }
 
-export default function CategoryCard({ name, items, icon: Icon, active = false }: CategoryCardProps) {
+export default function CategoryCard({ name, items, itemsLabel, icon: Icon, active = false }: CategoryCardProps) {
   return (
     <button
       type="button"
       className={`
         group flex min-w-[145px] flex-col items-center justify-center
         rounded-[32px] border px-6 py-6 text-center
-        transition-all duration-300
-        hover:-translate-y-1
+        transition-all duration-300 hover:-translate-y-1
         ${
           active
             ? 'border-[#d6b45e] bg-[#d6b45e]/10 shadow-[0_0_35px_rgba(214,180,94,.22)]'
@@ -35,7 +35,9 @@ export default function CategoryCard({ name, items, icon: Icon, active = false }
 
       <span className="mt-4 text-sm font-semibold uppercase tracking-[1.5px] text-white">{name}</span>
 
-      <span className="mt-1 text-[10px] uppercase tracking-[1px] text-[#d6b45e]">{items} items</span>
+      <span className="mt-1 text-[10px] uppercase tracking-[1px] text-[#d6b45e]">
+        {items} {itemsLabel}
+      </span>
     </button>
   )
 }

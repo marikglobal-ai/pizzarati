@@ -1,38 +1,40 @@
 import { Beef, CakeSlice, CupSoda, Pizza, Salad, Sandwich, Soup } from 'lucide-react'
 
+export type CategoryKey = 'pizza' | 'burgers' | 'kebab' | 'durum' | 'salads' | 'drinks' | 'desserts'
+
 export const categories = [
   {
-    name: 'Pizza',
+    key: 'pizza' as const,
     items: 18,
     icon: Pizza
   },
   {
-    name: 'Burgers',
+    key: 'burgers' as const,
     items: 12,
     icon: Sandwich
   },
   {
-    name: 'Kebab',
+    key: 'kebab' as const,
     items: 10,
     icon: Beef
   },
   {
-    name: 'Durum',
+    key: 'durum' as const,
     items: 8,
     icon: Soup
   },
   {
-    name: 'Salads',
+    key: 'salads' as const,
     items: 7,
     icon: Salad
   },
   {
-    name: 'Drinks',
+    key: 'drinks' as const,
     items: 15,
     icon: CupSoda
   },
   {
-    name: 'Desserts',
+    key: 'desserts' as const,
     items: 6,
     icon: CakeSlice
   }

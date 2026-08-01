@@ -1,34 +1,68 @@
+'use client'
+
 import { Quote, Star } from 'lucide-react'
 
 import Container from '@/components/ui/Container'
 import SectionTitle from '@/components/ui/SectionTitle'
+import { useLanguageStore } from '@/store/languageStore'
 
-const reviews = [
-  {
-    name: 'Michael Andersen',
-    role: 'Regular customer',
-    text: 'Best pizza in town. The ingredients are always fresh and the delivery is super fast.'
+const content = {
+  en: {
+    title: 'What Our Customers Say',
+    linkText: 'View all reviews',
+    reviews: [
+      {
+        name: 'Michael Andersen',
+        role: 'Regular customer',
+        text: 'Best pizza in town. The ingredients are always fresh and the delivery is super fast.'
+      },
+      {
+        name: 'Sofie Larsen',
+        role: 'Local customer',
+        text: 'Amazing taste, beautiful packaging and great service every single time.'
+      },
+      {
+        name: 'Jakob Nielsen',
+        role: 'Pizza lover',
+        text: 'I order from Pizzarati at least once a week. The quality is always consistent.'
+      }
+    ]
   },
-  {
-    name: 'Sofie Larsen',
-    role: 'Local customer',
-    text: 'Amazing taste, beautiful packaging and great service every single time.'
-  },
-  {
-    name: 'Jakob Nielsen',
-    role: 'Pizza lover',
-    text: 'I order from Pizzarati at least once a week. The quality is always consistent.'
+
+  da: {
+    title: 'Det siger vores kunder',
+    linkText: 'Se alle anmeldelser',
+    reviews: [
+      {
+        name: 'Michael Andersen',
+        role: 'Fast kunde',
+        text: 'Byens bedste pizza. Råvarerne er altid friske, og leveringen er superhurtig.'
+      },
+      {
+        name: 'Sofie Larsen',
+        role: 'Lokal kunde',
+        text: 'Fantastisk smag, flot emballage og virkelig god service hver eneste gang.'
+      },
+      {
+        name: 'Jakob Nielsen',
+        role: 'Pizzaelsker',
+        text: 'Jeg bestiller fra Pizzarati mindst én gang om ugen. Kvaliteten er altid stabil.'
+      }
+    ]
   }
-]
+} as const
 
 export default function Testimonials() {
+  const language = useLanguageStore(state => state.language)
+  const text = content[language]
+
   return (
-    <section id="reviews" className="border-b border-white/10 bg-[#080808] py-20">
+    <section id="reviews" className="border-b border-white/10 bg-[#080808] py-16 sm:py-20 lg:py-24">
       <Container>
-        <SectionTitle title="What Our Customers Say" linkText="View all reviews" linkHref="#reviews" />
+        <SectionTitle title={text.title} linkText={text.linkText} linkHref="#reviews" />
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {reviews.map(review => (
+          {text.reviews.map(review => (
             <article
               key={review.name}
               className="group relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.025] p-7 transition-all duration-300 hover:-translate-y-2 hover:border-[#d6b45e]/60 hover:shadow-[0_20px_55px_rgba(214,180,94,.1)]"

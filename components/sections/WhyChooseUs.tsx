@@ -1,39 +1,78 @@
+'use client'
+
 import { BadgeCheck, Bike, Flame, Leaf } from 'lucide-react'
 
 import Container from '@/components/ui/Container'
 import SectionTitle from '@/components/ui/SectionTitle'
+import { useLanguageStore } from '@/store/languageStore'
 
-const advantages = [
-  {
-    title: 'Fresh Ingredients',
-    description: 'Fresh vegetables, premium cheese and carefully selected ingredients.',
-    icon: Leaf
+const content = {
+  en: {
+    title: 'Why Choose Us',
+    linkText: 'About Pizzarati',
+    advantages: [
+      {
+        title: 'Fresh Ingredients',
+        description: 'Fresh vegetables, premium cheese and carefully selected ingredients.',
+        icon: Leaf
+      },
+      {
+        title: 'Stone Oven',
+        description: 'Every pizza is baked at high temperature for a crispy Italian crust.',
+        icon: Flame
+      },
+      {
+        title: 'Fast Delivery',
+        description: 'Your order is prepared quickly and delivered hot to your door.',
+        icon: Bike
+      },
+      {
+        title: 'Premium Quality',
+        description: 'Consistent taste, careful preparation and quality in every order.',
+        icon: BadgeCheck
+      }
+    ]
   },
-  {
-    title: 'Stone Oven',
-    description: 'Every pizza is baked at high temperature for a crispy Italian crust.',
-    icon: Flame
-  },
-  {
-    title: 'Fast Delivery',
-    description: 'Your order is prepared quickly and delivered hot to your door.',
-    icon: Bike
-  },
-  {
-    title: 'Premium Quality',
-    description: 'Consistent taste, careful preparation and quality in every order.',
-    icon: BadgeCheck
+
+  da: {
+    title: 'Hvorfor vælge os',
+    linkText: 'Om Pizzarati',
+    advantages: [
+      {
+        title: 'Friske råvarer',
+        description: 'Friske grøntsager, premiumost og nøje udvalgte ingredienser.',
+        icon: Leaf
+      },
+      {
+        title: 'Stenovn',
+        description: 'Hver pizza bages ved høj temperatur for at få en sprød italiensk bund.',
+        icon: Flame
+      },
+      {
+        title: 'Hurtig levering',
+        description: 'Din ordre tilberedes hurtigt og leveres varm direkte til døren.',
+        icon: Bike
+      },
+      {
+        title: 'Premium kvalitet',
+        description: 'Ensartet smag, omhyggelig tilberedning og høj kvalitet i hver ordre.',
+        icon: BadgeCheck
+      }
+    ]
   }
-]
+} as const
 
 export default function WhyChooseUs() {
+  const language = useLanguageStore(state => state.language)
+  const text = content[language]
+
   return (
-    <section id="about" className="border-b border-white/10 bg-[#0b0b0b] py-20">
+    <section id="about" className="border-b border-white/10 bg-[#0b0b0b] py-16 sm:py-20 lg:py-24">
       <Container>
-        <SectionTitle title="Why Choose Us" linkText="About Pizzarati" linkHref="#about" />
+        <SectionTitle title={text.title} linkText={text.linkText} linkHref="#about" />
 
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {advantages.map(advantage => {
+          {text.advantages.map(advantage => {
             const Icon = advantage.icon
 
             return (

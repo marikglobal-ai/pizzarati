@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #090909;
@@ -10,29 +10,61 @@
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
-  background: var(--background);
-  color: var(--text);
-  overflow-x: hidden;
+html {
+  width: 100%;
+  min-width: 320px;
   scroll-behavior: smooth;
-  font-family: var(--font-inter);
+  background: var(--background);
+}
+
+body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+
+  background: radial-gradient(circle at top, rgba(200, 169, 91, 0.12), transparent 40%), var(--background);
+
+  color: var(--text);
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+
+main {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+header,
+section,
+footer {
+  width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-title);
-}
-
-body {
-  background:
-    radial-gradient(circle at top, rgba(200,169,91,.12), transparent 40%),
-    #090909;
+  font-family: var(--font-title), Georgia, serif;
 }
