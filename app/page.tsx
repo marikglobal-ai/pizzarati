@@ -4,6 +4,7 @@ import Categories from '@/components/sections/Categories'
 import BestSellers from '@/components/sections/BestSellers'
 import CartSidebar from '../components/cart/CartSidebar'
 import WhyChooseUs from '@/components/sections/WhyChooseUs'
+import Testimonials from '@/components/sections/Testimonials'
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <Categories />
       <BestSellers />
       <WhyChooseUs />
+      <Testimonials />
     </main>
   )
 }
