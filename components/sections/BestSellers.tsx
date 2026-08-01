@@ -14,8 +14,9 @@ const sectionTranslations = {
     title: 'Our Menu',
     linkText: 'View all menu',
     minutes: 'min',
-    addToCart: 'Add to cart',
+    addToCart: 'Customize',
     searchPlaceholder: 'Search products...',
+    clearSearch: 'Clear search',
     emptyTitle: 'No products found',
     emptyDescription: 'Try another search or choose a different category.'
   },
@@ -24,8 +25,9 @@ const sectionTranslations = {
     title: 'Vores menu',
     linkText: 'Se hele menuen',
     minutes: 'min',
-    addToCart: 'Tilføj til kurv',
+    addToCart: 'Tilpas',
     searchPlaceholder: 'Søg efter produkter...',
+    clearSearch: 'Ryd søgning',
     emptyTitle: 'Ingen produkter fundet',
     emptyDescription: 'Prøv en anden søgning eller vælg en anden kategori.'
   }
@@ -35,24 +37,22 @@ export default function BestSellers() {
   const language = useLanguageStore(state => state.language)
 
   const activeCategory = useMenuStore(state => state.activeCategory)
-
   const searchQuery = useMenuStore(state => state.searchQuery)
-
   const setSearchQuery = useMenuStore(state => state.setSearchQuery)
 
   const text = sectionTranslations[language]
+
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase(language)
 
   const filteredProducts = products.filter(product => {
     const productText = product.translations[language]
 
     const matchesCategory = product.category === activeCategory
 
-    const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
-
     const matchesSearch =
       normalizedQuery.length === 0 ||
-      productText.name.toLocaleLowerCase().includes(normalizedQuery) ||
-      productText.description.toLocaleLowerCase().includes(normalizedQuery)
+      productText.name.toLocaleLowerCase(language).includes(normalizedQuery) ||
+      productText.description.toLocaleLowerCase(language).includes(normalizedQuery)
 
     return matchesCategory && matchesSearch
   })
@@ -78,7 +78,8 @@ export default function BestSellers() {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                aria-label="Clear search"
+                aria-label={text.clearSearch}
+                title={text.clearSearch}
                 className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center text-white/40 transition hover:text-white"
               >
                 <X size={18} />
@@ -104,6 +105,7 @@ export default function BestSellers() {
                   time={`${product.time} ${text.minutes}`}
                   badge={productText.badge}
                   addToCartLabel={text.addToCart}
+                  extraIngredientIds={product.extraIngredientIds}
                 />
               )
             })}

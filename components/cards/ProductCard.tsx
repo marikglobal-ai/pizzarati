@@ -1,7 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useCartStore } from '@/store/cartStore'
+
+import { useProductCustomizerStore } from '@/store/productCustomizerStore'
 
 type ProductCardProps = {
   id: number
@@ -13,6 +14,7 @@ type ProductCardProps = {
   time: string
   badge?: string
   addToCartLabel: string
+  extraIngredientIds?: string[]
 }
 
 export default function ProductCard({
@@ -24,9 +26,24 @@ export default function ProductCard({
   rating,
   time,
   badge,
-  addToCartLabel
+  addToCartLabel,
+  extraIngredientIds
 }: ProductCardProps) {
-  const addItem = useCartStore(state => state.addItem)
+  const openCustomizer = useProductCustomizerStore(state => state.openCustomizer)
+
+  function handleOpenCustomizer() {
+    openCustomizer({
+      id,
+      name,
+      description,
+      price,
+      image,
+      rating,
+      time,
+      badge,
+      extraIngredientIds
+    })
+  }
 
   return (
     <article className="group overflow-hidden rounded-[26px] border border-white/10 bg-[#101010] transition-all duration-300 hover:-translate-y-2 hover:border-[#d6b45e]/70 hover:shadow-[0_22px_55px_rgba(214,180,94,.14)]">
@@ -71,14 +88,7 @@ export default function ProductCard({
 
           <button
             type="button"
-            onClick={() =>
-              addItem({
-                id,
-                name,
-                price,
-                image
-              })
-            }
+            onClick={handleOpenCustomizer}
             aria-label={`${addToCartLabel}: ${name}`}
             title={addToCartLabel}
             className="flex h-13 w-13 items-center justify-center rounded-full border border-[#d6b45e] bg-[#d6b45e] text-2xl font-light text-black transition-all duration-300 hover:scale-110 hover:bg-[#efd27d] hover:shadow-[0_0_25px_rgba(214,180,94,.35)]"

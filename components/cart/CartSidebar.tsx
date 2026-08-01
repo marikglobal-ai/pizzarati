@@ -16,6 +16,8 @@ const content = {
     removeItem: 'Remove',
     decreaseItem: 'Decrease quantity',
     increaseItem: 'Increase quantity',
+    extras: 'Extras',
+    note: 'Note',
     total: 'Total',
     checkout: 'Checkout'
   },
@@ -29,6 +31,8 @@ const content = {
     removeItem: 'Fjern',
     decreaseItem: 'Reducer antal',
     increaseItem: 'Øg antal',
+    extras: 'Ekstra',
+    note: 'Bemærkning',
     total: 'I alt',
     checkout: 'Gå til betaling'
   }
@@ -92,7 +96,7 @@ export default function CartSidebar() {
             <div className="space-y-4">
               {items.map(item => (
                 <article
-                  key={item.id}
+                  key={item.cartId}
                   className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:gap-4"
                 >
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl sm:h-24 sm:w-24">
@@ -105,11 +109,33 @@ export default function CartSidebar() {
                         <h3 className="truncate font-serif text-lg text-white sm:text-xl">{item.name}</h3>
 
                         <p className="mt-1 text-sm text-[#d6b45e]">{item.price} kr</p>
+
+                        {item.extras && item.extras.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-[1px] text-white/35">
+                              {text.extras}
+                            </p>
+
+                            <ul className="mt-1 space-y-1 text-xs text-white/50">
+                              {item.extras.map(extra => (
+                                <li key={extra.id}>
+                                  + {extra.name} ({extra.price} kr)
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {item.note && (
+                          <p className="mt-2 text-xs leading-5 text-white/40">
+                            <span className="font-semibold text-white/55">{text.note}:</span> {item.note}
+                          </p>
+                        )}
                       </div>
 
                       <button
                         type="button"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.cartId)}
                         aria-label={`${text.removeItem}: ${item.name}`}
                         title={text.removeItem}
                         className="shrink-0 text-white/40 transition hover:text-red-400"
@@ -122,7 +148,7 @@ export default function CartSidebar() {
                       <div className="flex items-center rounded-full border border-white/10">
                         <button
                           type="button"
-                          onClick={() => decreaseItem(item.id)}
+                          onClick={() => decreaseItem(item.cartId)}
                           aria-label={`${text.decreaseItem}: ${item.name}`}
                           className="flex h-9 w-9 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
                         >
@@ -133,7 +159,7 @@ export default function CartSidebar() {
 
                         <button
                           type="button"
-                          onClick={() => increaseItem(item.id)}
+                          onClick={() => increaseItem(item.cartId)}
                           aria-label={`${text.increaseItem}: ${item.name}`}
                           className="flex h-9 w-9 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
                         >
