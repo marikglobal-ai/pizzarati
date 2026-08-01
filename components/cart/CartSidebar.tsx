@@ -1,10 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import { Minus, Plus, ShoppingCart, Trash2, X } from 'lucide-react'
+import { Minus, Pencil, Plus, ShoppingCart, Trash2, X } from 'lucide-react'
 
+import { products } from '@/data/products'
 import { useCartStore } from '@/store/cartStore'
 import { useLanguageStore } from '@/store/languageStore'
+import { useProductCustomizerStore } from '@/store/productCustomizerStore'
 
 const content = {
   en: {
@@ -14,12 +16,14 @@ const content = {
     emptyTitle: 'Your cart is empty',
     emptyDescription: 'Add your favourite pizzas and they will appear here.',
     removeItem: 'Remove',
+    editItem: 'Edit',
     decreaseItem: 'Decrease quantity',
     increaseItem: 'Increase quantity',
     extras: 'Extras',
     note: 'Note',
     total: 'Total',
-    checkout: 'Checkout'
+    checkout: 'Checkout',
+    minutes: 'min'
   },
 
   da: {
@@ -29,22 +33,60 @@ const content = {
     emptyTitle: 'Din kurv er tom',
     emptyDescription: 'Tilføj dine yndlingspizzaer, så vises de her.',
     removeItem: 'Fjern',
+    editItem: 'Rediger',
     decreaseItem: 'Reducer antal',
     increaseItem: 'Øg antal',
     extras: 'Ekstra',
     note: 'Bemærkning',
     total: 'I alt',
-    checkout: 'Gå til betaling'
+    checkout: 'Gå til betaling',
+    minutes: 'min'
   }
 } as const
 
 export default function CartSidebar() {
   const { items, isOpen, closeCart, increaseItem, decreaseItem, removeItem } = useCartStore()
 
+  const openCustomizer = useProductCustomizerStore(state => state.openCustomizer)
+
   const language = useLanguageStore(state => state.language)
   const text = content[language]
 
   const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0)
+
+  function handleEditItem(cartId: string) {
+    const cartItem = items.find(item => item.cartId === cartId)
+
+    if (!cartItem) return
+
+    const product = products.find(currentProduct => currentProduct.id === cartItem.id)
+
+    if (!product) return
+
+    const productText = product.translations[language]
+
+    closeCart()
+
+    openCustomizer(
+      {
+        id: product.id,
+        name: productText.name,
+        description: productText.description,
+        price: product.price,
+        image: product.image,
+        rating: product.rating,
+        time: `${product.time} ${text.minutes}`,
+        badge: productText.badge,
+        extraIngredientIds: product.extraIngredientIds
+      },
+      {
+        cartId: cartItem.cartId,
+        selectedExtraIds: cartItem.extras?.map(extra => extra.id) ?? [],
+        quantity: cartItem.quantity,
+        note: cartItem.note ?? ''
+      }
+    )
+  }
 
   return (
     <>
@@ -133,15 +175,27 @@ export default function CartSidebar() {
                         )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.cartId)}
-                        aria-label={`${text.removeItem}: ${item.name}`}
-                        title={text.removeItem}
-                        className="shrink-0 text-white/40 transition hover:text-red-400"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => handleEditItem(item.cartId)}
+                          aria-label={`${text.editItem}: ${item.name}`}
+                          title={text.editItem}
+                          className="text-white/40 transition hover:text-[#d6b45e]"
+                        >
+                          <Pencil size={17} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.cartId)}
+                          aria-label={`${text.removeItem}: ${item.name}`}
+                          title={text.removeItem}
+                          className="text-white/40 transition hover:text-red-400"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="mt-3 flex items-center justify-between gap-3">

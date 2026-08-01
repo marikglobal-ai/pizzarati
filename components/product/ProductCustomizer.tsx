@@ -12,8 +12,6 @@ import { useProductCustomizerStore } from '@/store/productCustomizerStore'
 const content = {
   en: {
     close: 'Close',
-    rating: 'Rating',
-    preparation: 'Preparation',
     basePrice: 'Base price',
     extrasTitle: 'Extra ingredients',
     extrasDescription: 'Choose any ingredients you would like to add.',
@@ -21,14 +19,15 @@ const content = {
     noteTitle: 'Special instructions',
     notePlaceholder: 'For example: no onions, bake well done...',
     quantity: 'Quantity',
+    decreaseQuantity: 'Decrease quantity',
+    increaseQuantity: 'Increase quantity',
     total: 'Total',
-    addToCart: 'Add to cart'
+    addToCart: 'Add to cart',
+    updateCart: 'Update order'
   },
 
   da: {
     close: 'Luk',
-    rating: 'Bedømmelse',
-    preparation: 'Tilberedning',
     basePrice: 'Grundpris',
     extrasTitle: 'Ekstra ingredienser',
     extrasDescription: 'Vælg de ingredienser, du ønsker at tilføje.',
@@ -36,17 +35,22 @@ const content = {
     noteTitle: 'Særlige ønsker',
     notePlaceholder: 'For eksempel: uden løg, ekstra sprød...',
     quantity: 'Antal',
+    decreaseQuantity: 'Reducer antal',
+    increaseQuantity: 'Øg antal',
     total: 'I alt',
-    addToCart: 'Tilføj til kurv'
+    addToCart: 'Tilføj til kurv',
+    updateCart: 'Opdater ordre'
   }
 } as const
 
 export default function ProductCustomizer() {
   const product = useProductCustomizerStore(state => state.product)
+  const initialValues = useProductCustomizerStore(state => state.initialValues)
   const isOpen = useProductCustomizerStore(state => state.isOpen)
   const closeCustomizer = useProductCustomizerStore(state => state.closeCustomizer)
 
   const addItem = useCartStore(state => state.addItem)
+  const updateItem = useCartStore(state => state.updateItem)
 
   const language = useLanguageStore(state => state.language)
   const text = content[language]
@@ -55,16 +59,17 @@ export default function ProductCustomizer() {
   const [quantity, setQuantity] = useState(1)
   const [note, setNote] = useState('')
 
+  const isEditing = Boolean(initialValues)
+
   const availableExtras = useMemo(() => {
     if (!product?.extraIngredientIds) return []
 
     return extraIngredients.filter(extra => product.extraIngredientIds?.includes(extra.id))
   }, [product])
 
-  const selectedExtras = useMemo(
-    () => availableExtras.filter(extra => selectedExtraIds.includes(extra.id)),
-    [availableExtras, selectedExtraIds]
-  )
+  const selectedExtras = useMemo(() => {
+    return availableExtras.filter(extra => selectedExtraIds.includes(extra.id))
+  }, [availableExtras, selectedExtraIds])
 
   const extrasPrice = selectedExtras.reduce((total, extra) => total + extra.price, 0)
 
@@ -74,9 +79,15 @@ export default function ProductCustomizer() {
   useEffect(() => {
     if (!isOpen) return
 
-    setSelectedExtraIds([])
-    setQuantity(1)
-    setNote('')
+    if (initialValues) {
+      setSelectedExtraIds(initialValues.selectedExtraIds)
+      setQuantity(initialValues.quantity)
+      setNote(initialValues.note)
+    } else {
+      setSelectedExtraIds([])
+      setQuantity(1)
+      setNote('')
+    }
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -84,7 +95,7 @@ export default function ProductCustomizer() {
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [isOpen, product?.id])
+  }, [isOpen, product?.id, initialValues])
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -116,10 +127,10 @@ export default function ProductCustomizer() {
     setQuantity(current => current + 1)
   }
 
-  function handleAddToCart() {
+  function handleSave() {
     if (!product) return
 
-    addItem({
+    const cartProduct = {
       id: product.id,
       name: product.name,
       price: unitPrice,
@@ -131,7 +142,13 @@ export default function ProductCustomizer() {
         price: extra.price
       })),
       note: note.trim() || undefined
-    })
+    }
+
+    if (initialValues) {
+      updateItem(initialValues.cartId, cartProduct)
+    } else {
+      addItem(cartProduct)
+    }
 
     closeCustomizer()
   }
@@ -301,7 +318,7 @@ export default function ProductCustomizer() {
                   <button
                     type="button"
                     onClick={decreaseQuantity}
-                    aria-label={text.quantity}
+                    aria-label={text.decreaseQuantity}
                     className="flex h-11 w-11 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
                   >
                     <Minus size={16} />
@@ -312,7 +329,7 @@ export default function ProductCustomizer() {
                   <button
                     type="button"
                     onClick={increaseQuantity}
-                    aria-label={text.quantity}
+                    aria-label={text.increaseQuantity}
                     className="flex h-11 w-11 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
                   >
                     <Plus size={16} />
@@ -329,10 +346,10 @@ export default function ProductCustomizer() {
 
             <button
               type="button"
-              onClick={handleAddToCart}
+              onClick={handleSave}
               className="mt-6 w-full rounded-2xl bg-[#d6b45e] px-6 py-4 font-semibold uppercase tracking-[2px] text-black transition hover:bg-[#efd27d] hover:shadow-[0_0_35px_rgba(214,180,94,.25)]"
             >
-              {text.addToCart} · {totalPrice} kr
+              {isEditing ? text.updateCart : text.addToCart} · {totalPrice} kr
             </button>
           </div>
         </div>
