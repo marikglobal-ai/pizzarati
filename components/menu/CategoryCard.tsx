@@ -6,12 +6,22 @@ type CategoryCardProps = {
   itemsLabel: string
   icon: LucideIcon
   active?: boolean
+  onClick?: () => void
 }
 
-export default function CategoryCard({ name, items, itemsLabel, icon: Icon, active = false }: CategoryCardProps) {
+export default function CategoryCard({
+  name,
+  items,
+  itemsLabel,
+  icon: Icon,
+  active = false,
+  onClick
+}: CategoryCardProps) {
   return (
     <button
       type="button"
+      onClick={onClick}
+      aria-pressed={active}
       className={`
         group flex min-w-[145px] flex-col items-center justify-center
         rounded-[32px] border px-6 py-6 text-center
