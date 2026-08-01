@@ -20,13 +20,13 @@ const stats = [
 
 export default function Hero() {
   return (
-    <section id="home" className="relative min-h-screen overflow-hidden border-b border-white/10 pt-24">
+    <section id="home" className="relative overflow-hidden border-b border-white/10 pt-24">
       {/* Фоновое золотое свечение */}
       <div className="pointer-events-none absolute left-[15%] top-10 h-96 w-96 rounded-full bg-[#c9a34d]/10 blur-[130px]" />
 
-      <div className="mx-auto grid min-h-[calc(100vh-6rem)] max-w-[1440px] lg:grid-cols-[44%_56%]">
+      <div className="mx-auto grid min-h-[680px] max-w-[1440px] lg:grid-cols-[42%_58%]">
         {/* Левая часть */}
-        <div className="relative z-10 flex flex-col justify-center px-6 py-16 sm:px-10 lg:px-14 xl:px-16">
+        <div className="relative z-10 flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-14 xl:px-16">
           <div className="mb-6 flex items-center gap-4">
             <span className="h-px w-10 bg-[#d5b158]" />
 
@@ -35,7 +35,7 @@ export default function Hero() {
             </p>
           </div>
 
-          <h1 className="font-serif text-[58px] font-medium uppercase leading-[0.88] tracking-[-2px] text-white sm:text-7xl lg:text-[86px] xl:text-[100px]">
+          <h1 className="font-serif text-[52px] font-medium uppercase leading-[0.9] tracking-[-2px] text-white sm:text-6xl lg:text-[76px] xl:text-[88px]">
             Crafted
             <br />
             with
@@ -73,13 +73,13 @@ export default function Hero() {
         </div>
 
         {/* Правая часть с пиццей */}
-        <div className="relative min-h-[480px] overflow-hidden lg:min-h-full">
+        <div className="relative min-h-[420px] overflow-hidden lg:min-h-full">
           <div className="absolute inset-0 bg-gradient-to-r from-[#090909] via-transparent to-transparent lg:z-10" />
 
           <img
             src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=1600&q=90"
             alt="Fresh Pizzarati pepperoni pizza"
-            className="h-full min-h-[480px] w-full object-cover transition duration-700 hover:scale-[1.03] lg:min-h-full"
+            className="h-full min-h-[420px] w-full object-cover transition duration-700 hover:scale-[1.03] lg:min-h-full"
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />

@@ -12,31 +12,32 @@ type ProductCardProps = {
 
 export default function ProductCard({ name, description, price, image, rating, time, badge }: ProductCardProps) {
   return (
-    <article className="group overflow-hidden rounded-2xl border border-[#d6b45e]/25 bg-[#101010] transition duration-300 hover:-translate-y-2 hover:border-[#d6b45e]/70 hover:shadow-[0_18px_50px_rgba(214,180,94,.14)]">
-      <div className="relative h-56 overflow-hidden sm:h-64">
+    <article className="group overflow-hidden rounded-[26px] border border-white/10 bg-[#101010] transition-all duration-300 hover:-translate-y-2 hover:border-[#d6b45e]/70 hover:shadow-[0_22px_55px_rgba(214,180,94,.14)]">
+      <div className="relative h-72 overflow-hidden sm:h-80">
         <Image
           src={image}
           alt={name}
           fill
           unoptimized
-          className="object-cover transition duration-500 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
         {badge && (
-          <span className="absolute left-4 top-4 rounded-md border border-[#d6b45e]/60 bg-black/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[1px] text-[#d6b45e] backdrop-blur">
+          <span className="absolute left-4 top-4 rounded-full border border-[#d6b45e]/60 bg-black/75 px-4 py-2 text-[10px] font-semibold uppercase tracking-[1.4px] text-[#d6b45e] backdrop-blur-md">
             {badge}
           </span>
         )}
       </div>
 
-      <div className="p-5">
-        <h3 className="font-serif text-2xl text-white">{name}</h3>
+      <div className="p-6">
+        <h3 className="font-serif text-3xl text-white">{name}</h3>
 
-        <p className="mt-2 min-h-12 text-sm leading-6 text-white/50">{description}</p>
+        <p className="mt-3 min-h-[52px] text-sm leading-6 text-white/55">{description}</p>
 
-        <div className="mt-4 flex items-center gap-5 text-xs text-white/60">
+        <div className="mt-5 flex items-center gap-6 text-xs uppercase tracking-[1px] text-white/60">
           <span className="flex items-center gap-2">
             <span className="text-[#d6b45e]">★</span>
             {rating}
@@ -48,13 +49,13 @@ export default function ProductCard({ name, description, price, image, rating, t
           </span>
         </div>
 
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-7 flex items-center justify-between border-t border-white/10 pt-5">
           <span className="text-2xl font-semibold text-white">{price} kr</span>
 
           <button
             type="button"
             aria-label={`Add ${name} to cart`}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-[#d6b45e] text-2xl text-black transition duration-300 hover:scale-110 hover:bg-[#efd27d]"
+            className="flex h-13 w-13 items-center justify-center rounded-full border border-[#d6b45e] bg-[#d6b45e] text-2xl font-light text-black transition-all duration-300 hover:scale-110 hover:bg-[#efd27d] hover:shadow-[0_0_25px_rgba(214,180,94,.35)]"
           >
             +
           </button>
@@ -63,4 +64,3 @@ export default function ProductCard({ name, description, price, image, rating, t
     </article>
   )
 }
-

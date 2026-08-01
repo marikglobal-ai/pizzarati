@@ -11,7 +11,7 @@ export default function BestSellers() {
       <Container>
         <SectionTitle title="Best Sellers" linkText="View all menu" linkHref="#menu" />
 
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-4">
           {bestSellers.map(product => (
             <ProductCard
               key={product.id}
