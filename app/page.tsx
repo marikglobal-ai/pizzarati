@@ -5,6 +5,8 @@ import BestSellers from '@/components/sections/BestSellers'
 import CartSidebar from '../components/cart/CartSidebar'
 import WhyChooseUs from '@/components/sections/WhyChooseUs'
 import Testimonials from '@/components/sections/Testimonials'
+import Newsletter from '@/components/sections/Newsletter'
+import Footer from '@/components/layout/Footer'
 
 export default function Home() {
   return (
@@ -16,6 +18,8 @@ export default function Home() {
       <BestSellers />
       <WhyChooseUs />
       <Testimonials />
+      <Newsletter />
+      <Footer />
     </main>
   )
 }
