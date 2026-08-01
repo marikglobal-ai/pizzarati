@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { useCartStore } from '@/store/cartStore'
 
 export default function Navbar() {
+  const openCart = useCartStore(state => state.openCart)
   const totalItems = useCartStore(state => state.items.reduce((total, item) => total + item.quantity, 0))
   return (
     <header className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/70 backdrop-blur-xl">
@@ -60,6 +61,7 @@ export default function Navbar() {
         {/* Правая часть */}
         <div className="flex items-center gap-4">
           <button
+            onClick={openCart}
             type="button"
             aria-label="Open cart"
             className="relative flex h-12 w-12 items-center justify-center rounded-full border border-[#d6b45e]/60 text-[#d6b45e] transition duration-300 hover:bg-[#d6b45e] hover:text-black"
