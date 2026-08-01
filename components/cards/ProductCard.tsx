@@ -1,6 +1,9 @@
+'use client'
 import Image from 'next/image'
+import { useCartStore } from '@/store/cartStore'
 
 type ProductCardProps = {
+  id: number
   name: string
   description: string
   price: number
@@ -10,7 +13,8 @@ type ProductCardProps = {
   badge?: string
 }
 
-export default function ProductCard({ name, description, price, image, rating, time, badge }: ProductCardProps) {
+export default function ProductCard({ id, name, description, price, image, rating, time, badge }: ProductCardProps) {
+  const addItem = useCartStore(state => state.addItem)
   return (
     <article className="group overflow-hidden rounded-[26px] border border-white/10 bg-[#101010] transition-all duration-300 hover:-translate-y-2 hover:border-[#d6b45e]/70 hover:shadow-[0_22px_55px_rgba(214,180,94,.14)]">
       <div className="relative h-72 overflow-hidden sm:h-80">
@@ -54,6 +58,14 @@ export default function ProductCard({ name, description, price, image, rating, t
 
           <button
             type="button"
+            onClick={() =>
+              addItem({
+                id,
+                name,
+                price,
+                image
+              })
+            }
             aria-label={`Add ${name} to cart`}
             className="flex h-13 w-13 items-center justify-center rounded-full border border-[#d6b45e] bg-[#d6b45e] text-2xl font-light text-black transition-all duration-300 hover:scale-110 hover:bg-[#efd27d] hover:shadow-[0_0_25px_rgba(214,180,94,.35)]"
           >

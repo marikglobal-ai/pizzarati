@@ -1,6 +1,9 @@
+'use client'
 import Image from 'next/image'
+import { useCartStore } from '@/store/cartStore'
 
 export default function Navbar() {
+  const totalItems = useCartStore(state => state.items.reduce((total, item) => total + item.quantity, 0))
   return (
     <header className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/70 backdrop-blur-xl">
       <div className="mx-auto flex h-24 max-w-[1440px] items-center justify-between px-6 lg:px-12">
@@ -14,10 +17,6 @@ export default function Navbar() {
             priority
             className="h-16 w-16 object-contain"
           />
-
-          <span className="hidden font-serif text-2xl font-semibold tracking-[4px] text-[#d6b45e] sm:block">
-            PIZZARATI
-          </span>
         </a>
 
         {/* Навигация */}
@@ -68,7 +67,7 @@ export default function Navbar() {
             <span className="text-xl">🛒</span>
 
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d6b45e] px-1 text-xs font-bold text-black">
-              0
+              {totalItems}
             </span>
           </button>
 
