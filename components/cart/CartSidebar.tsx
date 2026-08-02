@@ -14,13 +14,14 @@ const content = {
     title: 'Shopping Cart',
     closeCart: 'Close cart',
     emptyTitle: 'Your cart is empty',
-    emptyDescription: 'Add your favourite pizzas and they will appear here.',
+    emptyDescription: 'Add your favourite products and they will appear here.',
     removeItem: 'Remove',
     editItem: 'Edit',
     decreaseItem: 'Decrease quantity',
     increaseItem: 'Increase quantity',
     size: 'Size',
     dough: 'Dough',
+    option: 'Option',
     extras: 'Extras',
     note: 'Note',
     total: 'Total',
@@ -34,13 +35,14 @@ const content = {
     title: 'Indkøbskurv',
     closeCart: 'Luk kurv',
     emptyTitle: 'Din kurv er tom',
-    emptyDescription: 'Tilføj dine yndlingspizzaer, så vises de her.',
+    emptyDescription: 'Tilføj dine yndlingsprodukter, så vises de her.',
     removeItem: 'Fjern',
     editItem: 'Rediger',
     decreaseItem: 'Reducer antal',
     increaseItem: 'Øg antal',
     size: 'Størrelse',
     dough: 'Dej',
+    option: 'Variant',
     extras: 'Ekstra',
     note: 'Bemærkning',
     total: 'I alt',
@@ -79,6 +81,7 @@ export default function CartSidebar() {
         name: productText.name,
         description: productText.description,
         price: product.price,
+        menuPrice: product.menuPrice,
         image: product.image,
         rating: product.rating,
         time: `${product.time} ${text.minutes}`,
@@ -92,7 +95,8 @@ export default function CartSidebar() {
         quantity: cartItem.quantity,
         note: cartItem.note ?? '',
         selectedSizeKey: cartItem.pizzaSize?.key,
-        selectedDoughKey: cartItem.dough?.key
+        selectedDoughKey: cartItem.dough?.key,
+        selectedMealKey: cartItem.meal?.key
       }
     )
   }
@@ -180,7 +184,7 @@ export default function CartSidebar() {
 
                           <p className="mt-1 text-sm text-[#d6b45e]">{item.price} kr</p>
 
-                          {(sizeLabel || item.dough) && (
+                          {(sizeLabel || item.dough || item.meal) && (
                             <div className="mt-2 space-y-1 text-xs text-white/50">
                               {sizeLabel && (
                                 <p>
@@ -192,6 +196,12 @@ export default function CartSidebar() {
                                 <p>
                                   <span className="font-semibold text-white/65">{text.dough}:</span> {item.dough.name}
                                   {item.dough.price > 0 ? ` (+${item.dough.price} kr)` : ''}
+                                </p>
+                              )}
+
+                              {item.meal && (
+                                <p>
+                                  <span className="font-semibold text-white/65">{text.option}:</span> {item.meal.name}
                                 </p>
                               )}
                             </div>

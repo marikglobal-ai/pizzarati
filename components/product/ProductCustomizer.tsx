@@ -11,6 +11,7 @@ import { useLanguageStore } from '@/store/languageStore'
 import { useProductCustomizerStore } from '@/store/productCustomizerStore'
 
 type DoughKey = 'regular' | 'wholegrain' | 'glutenFree'
+type MealKey = 'single' | 'menu'
 
 const doughOptions = [
   {
@@ -43,23 +44,35 @@ const content = {
   en: {
     close: 'Close',
     from: 'From',
+
     sizeTitle: 'Choose size',
     sizeDescription: 'Choose the pizza size you would like.',
     medium: 'M',
     large: 'L',
     xxl: 'XXL',
     deepPan: 'Deep Pan',
+
     doughTitle: 'Choose dough',
     doughDescription: 'Choose your preferred pizza dough.',
     included: 'Included',
+
+    mealTitle: 'Choose option',
+    mealDescription: 'Order the burger alone or as a complete menu.',
+    burgerOnly: 'Burger only',
+    burgerMenu: 'Burger menu',
+    burgerMenuDescription: 'Includes fries and a 33 cl soft drink',
+
     extrasTitle: 'Extra ingredients',
     extrasDescription: 'Choose any ingredients you would like to add.',
     noExtras: 'No extra ingredients are available for this product.',
+
     noteTitle: 'Special instructions',
     notePlaceholder: 'For example: no onions, bake well done...',
+
     quantity: 'Quantity',
     decreaseQuantity: 'Decrease quantity',
     increaseQuantity: 'Increase quantity',
+
     total: 'Total',
     addToCart: 'Add to cart',
     updateCart: 'Update order'
@@ -68,23 +81,35 @@ const content = {
   da: {
     close: 'Luk',
     from: 'Fra',
+
     sizeTitle: 'Vælg størrelse',
     sizeDescription: 'Vælg den ønskede pizzastørrelse.',
     medium: 'M',
     large: 'L',
     xxl: 'XXL',
     deepPan: 'Deep Pan',
+
     doughTitle: 'Vælg dej',
     doughDescription: 'Vælg den ønskede pizzadej.',
     included: 'Inkluderet',
+
+    mealTitle: 'Vælg variant',
+    mealDescription: 'Bestil burgeren alene eller som en komplet menu.',
+    burgerOnly: 'Kun burger',
+    burgerMenu: 'Burgermenu',
+    burgerMenuDescription: 'Inkluderer pommes frites og 33 cl sodavand',
+
     extrasTitle: 'Ekstra ingredienser',
     extrasDescription: 'Vælg de ingredienser, du ønsker at tilføje.',
     noExtras: 'Der er ingen ekstra ingredienser til dette produkt.',
+
     noteTitle: 'Særlige ønsker',
     notePlaceholder: 'For eksempel: uden løg, ekstra sprød...',
+
     quantity: 'Antal',
     decreaseQuantity: 'Reducer antal',
     increaseQuantity: 'Øg antal',
+
     total: 'I alt',
     addToCart: 'Tilføj til kurv',
     updateCart: 'Opdater ordre'
@@ -110,12 +135,15 @@ export default function ProductCustomizer() {
 
   const [selectedDoughKey, setSelectedDoughKey] = useState<DoughKey>('regular')
 
+  const [selectedMealKey, setSelectedMealKey] = useState<MealKey>('single')
+
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([])
   const [quantity, setQuantity] = useState(1)
   const [note, setNote] = useState('')
 
   const isEditing = Boolean(initialValues)
   const hasPizzaSizes = Boolean(product?.pizzaSizes?.length)
+  const hasMealOption = typeof product?.menuPrice === 'number'
 
   const selectedSize = useMemo(() => {
     if (!product?.pizzaSizes?.length) return null
@@ -139,7 +167,10 @@ export default function ProductCustomizer() {
 
   const extrasPrice = selectedExtras.reduce((total, extra) => total + extra.price, 0)
 
-  const basePrice = selectedSize ? selectedSize.price : (product?.price ?? 0)
+  const selectedMealPrice =
+    hasMealOption && selectedMealKey === 'menu' ? (product?.menuPrice ?? product?.price ?? 0) : (product?.price ?? 0)
+
+  const basePrice = hasPizzaSizes ? (selectedSize?.price ?? product?.price ?? 0) : selectedMealPrice
 
   const doughPrice = hasPizzaSizes ? selectedDough.price : 0
 
@@ -156,8 +187,11 @@ export default function ProductCustomizer() {
 
     const savedDoughKey = initialValues?.selectedDoughKey as DoughKey | undefined
 
+    const savedMealKey = initialValues?.selectedMealKey as MealKey | undefined
+
     setSelectedSizeKey(savedSizeKey ?? defaultSize)
     setSelectedDoughKey(savedDoughKey ?? 'regular')
+    setSelectedMealKey(savedMealKey ?? 'single')
 
     if (initialValues) {
       setSelectedExtraIds(initialValues.selectedExtraIds)
@@ -245,6 +279,13 @@ export default function ProductCustomizer() {
             key: selectedDough.key,
             name: selectedDough.translations[language],
             price: selectedDough.price
+          }
+        : undefined,
+
+      meal: hasMealOption
+        ? {
+            key: selectedMealKey,
+            name: selectedMealKey === 'menu' ? text.burgerMenu : text.burgerOnly
           }
         : undefined,
 
@@ -424,61 +465,109 @@ export default function ProductCustomizer() {
               </>
             )}
 
-            <div className={hasPizzaSizes ? 'mt-8' : ''}>
-              <h3 className="font-serif text-2xl text-white">{text.extrasTitle}</h3>
+            {hasMealOption && (
+              <>
+                <div>
+                  <h3 className="font-serif text-2xl text-white">{text.mealTitle}</h3>
 
-              <p className="mt-2 text-sm leading-6 text-white/45">{text.extrasDescription}</p>
-            </div>
+                  <p className="mt-2 text-sm leading-6 text-white/45">{text.mealDescription}</p>
+                </div>
 
-            {availableExtras.length > 0 ? (
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {availableExtras.map(extra => {
-                  const isSelected = selectedExtraIds.includes(extra.id)
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMealKey('single')}
+                    aria-pressed={selectedMealKey === 'single'}
+                    className={`
+                      rounded-2xl border px-5 py-5 text-left transition
+                      ${
+                        selectedMealKey === 'single'
+                          ? 'border-[#d6b45e] bg-[#d6b45e]/10'
+                          : 'border-white/10 bg-white/[0.025] hover:border-[#d6b45e]/50'
+                      }
+                    `}
+                  >
+                    <span className="block font-semibold text-white">{text.burgerOnly}</span>
 
-                  return (
-                    <button
-                      key={extra.id}
-                      type="button"
-                      onClick={() => toggleExtra(extra.id)}
-                      aria-pressed={isSelected}
-                      className={`
-                        flex min-h-14 items-center justify-between
-                        gap-3 rounded-2xl border px-4 py-3
-                        text-left transition
-                        ${
-                          isSelected
-                            ? 'border-[#d6b45e] bg-[#d6b45e]/10'
-                            : 'border-white/10 bg-white/[0.025] hover:border-[#d6b45e]/50'
-                        }
-                      `}
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span
-                          className={`
-                            flex h-6 w-6 shrink-0 items-center
-                            justify-center rounded-md border transition
-                            ${
-                              isSelected
-                                ? 'border-[#d6b45e] bg-[#d6b45e] text-black'
-                                : 'border-white/20 text-transparent'
-                            }
-                          `}
-                        >
-                          <Check size={14} strokeWidth={3} />
-                        </span>
+                    <span className="mt-2 block text-sm font-semibold text-[#d6b45e]">{product.price} kr</span>
+                  </button>
 
-                        <span className="truncate text-sm text-white/80">{extra.translations[language]}</span>
-                      </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMealKey('menu')}
+                    aria-pressed={selectedMealKey === 'menu'}
+                    className={`
+                      rounded-2xl border px-5 py-5 text-left transition
+                      ${
+                        selectedMealKey === 'menu'
+                          ? 'border-[#d6b45e] bg-[#d6b45e]/10'
+                          : 'border-white/10 bg-white/[0.025] hover:border-[#d6b45e]/50'
+                      }
+                    `}
+                  >
+                    <span className="block font-semibold text-white">{text.burgerMenu}</span>
 
-                      <span className="shrink-0 text-xs font-semibold text-[#d6b45e]">+{extra.price} kr</span>
-                    </button>
-                  )
-                })}
-              </div>
-            ) : (
-              <p className="mt-6 rounded-2xl border border-dashed border-white/10 p-5 text-sm text-white/40">
-                {text.noExtras}
-              </p>
+                    <span className="mt-1 block text-xs leading-5 text-white/45">{text.burgerMenuDescription}</span>
+
+                    <span className="mt-2 block text-sm font-semibold text-[#d6b45e]">{product.menuPrice} kr</span>
+                  </button>
+                </div>
+              </>
+            )}
+
+            {availableExtras.length > 0 && (
+              <>
+                <div className={hasPizzaSizes || hasMealOption ? 'mt-8' : ''}>
+                  <h3 className="font-serif text-2xl text-white">{text.extrasTitle}</h3>
+
+                  <p className="mt-2 text-sm leading-6 text-white/45">{text.extrasDescription}</p>
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {availableExtras.map(extra => {
+                    const isSelected = selectedExtraIds.includes(extra.id)
+
+                    return (
+                      <button
+                        key={extra.id}
+                        type="button"
+                        onClick={() => toggleExtra(extra.id)}
+                        aria-pressed={isSelected}
+                        className={`
+                          flex min-h-14 items-center justify-between
+                          gap-3 rounded-2xl border px-4 py-3
+                          text-left transition
+                          ${
+                            isSelected
+                              ? 'border-[#d6b45e] bg-[#d6b45e]/10'
+                              : 'border-white/10 bg-white/[0.025] hover:border-[#d6b45e]/50'
+                          }
+                        `}
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={`
+                              flex h-6 w-6 shrink-0 items-center
+                              justify-center rounded-md border transition
+                              ${
+                                isSelected
+                                  ? 'border-[#d6b45e] bg-[#d6b45e] text-black'
+                                  : 'border-white/20 text-transparent'
+                              }
+                            `}
+                          >
+                            <Check size={14} strokeWidth={3} />
+                          </span>
+
+                          <span className="truncate text-sm text-white/80">{extra.translations[language]}</span>
+                        </div>
+
+                        <span className="shrink-0 text-xs font-semibold text-[#d6b45e]">+{extra.price} kr</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
             )}
 
             <div className="mt-7">
