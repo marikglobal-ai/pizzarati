@@ -5,14 +5,53 @@ import { Check, Minus, Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { extraIngredients } from '@/data/extras'
+import type { PizzaSizeKey } from '@/data/menuTypes'
 import { useCartStore } from '@/store/cartStore'
 import { useLanguageStore } from '@/store/languageStore'
 import { useProductCustomizerStore } from '@/store/productCustomizerStore'
 
+type DoughKey = 'regular' | 'wholegrain' | 'glutenFree'
+
+const doughOptions = [
+  {
+    key: 'regular' as const,
+    price: 0,
+    translations: {
+      en: 'Regular dough',
+      da: 'Almindelig dej'
+    }
+  },
+  {
+    key: 'wholegrain' as const,
+    price: 5,
+    translations: {
+      en: 'Wholegrain dough',
+      da: 'Fuldkornsdej'
+    }
+  },
+  {
+    key: 'glutenFree' as const,
+    price: 35,
+    translations: {
+      en: 'Gluten-free dough',
+      da: 'Glutenfri dej'
+    }
+  }
+]
+
 const content = {
   en: {
     close: 'Close',
-    basePrice: 'Base price',
+    from: 'From',
+    sizeTitle: 'Choose size',
+    sizeDescription: 'Choose the pizza size you would like.',
+    medium: 'M',
+    large: 'L',
+    xxl: 'XXL',
+    deepPan: 'Deep Pan',
+    doughTitle: 'Choose dough',
+    doughDescription: 'Choose your preferred pizza dough.',
+    included: 'Included',
     extrasTitle: 'Extra ingredients',
     extrasDescription: 'Choose any ingredients you would like to add.',
     noExtras: 'No extra ingredients are available for this product.',
@@ -28,7 +67,16 @@ const content = {
 
   da: {
     close: 'Luk',
-    basePrice: 'Grundpris',
+    from: 'Fra',
+    sizeTitle: 'Vælg størrelse',
+    sizeDescription: 'Vælg den ønskede pizzastørrelse.',
+    medium: 'M',
+    large: 'L',
+    xxl: 'XXL',
+    deepPan: 'Deep Pan',
+    doughTitle: 'Vælg dej',
+    doughDescription: 'Vælg den ønskede pizzadej.',
+    included: 'Inkluderet',
     extrasTitle: 'Ekstra ingredienser',
     extrasDescription: 'Vælg de ingredienser, du ønsker at tilføje.',
     noExtras: 'Der er ingen ekstra ingredienser til dette produkt.',
@@ -45,8 +93,11 @@ const content = {
 
 export default function ProductCustomizer() {
   const product = useProductCustomizerStore(state => state.product)
+
   const initialValues = useProductCustomizerStore(state => state.initialValues)
+
   const isOpen = useProductCustomizerStore(state => state.isOpen)
+
   const closeCustomizer = useProductCustomizerStore(state => state.closeCustomizer)
 
   const addItem = useCartStore(state => state.addItem)
@@ -55,11 +106,26 @@ export default function ProductCustomizer() {
   const language = useLanguageStore(state => state.language)
   const text = content[language]
 
+  const [selectedSizeKey, setSelectedSizeKey] = useState<PizzaSizeKey>('medium')
+
+  const [selectedDoughKey, setSelectedDoughKey] = useState<DoughKey>('regular')
+
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([])
   const [quantity, setQuantity] = useState(1)
   const [note, setNote] = useState('')
 
   const isEditing = Boolean(initialValues)
+  const hasPizzaSizes = Boolean(product?.pizzaSizes?.length)
+
+  const selectedSize = useMemo(() => {
+    if (!product?.pizzaSizes?.length) return null
+
+    return product.pizzaSizes.find(size => size.key === selectedSizeKey) ?? product.pizzaSizes[0]
+  }, [product, selectedSizeKey])
+
+  const selectedDough = useMemo(() => {
+    return doughOptions.find(dough => dough.key === selectedDoughKey) ?? doughOptions[0]
+  }, [selectedDoughKey])
 
   const availableExtras = useMemo(() => {
     if (!product?.extraIngredientIds) return []
@@ -73,11 +139,25 @@ export default function ProductCustomizer() {
 
   const extrasPrice = selectedExtras.reduce((total, extra) => total + extra.price, 0)
 
-  const unitPrice = product ? product.price + extrasPrice : 0
+  const basePrice = selectedSize ? selectedSize.price : (product?.price ?? 0)
+
+  const doughPrice = hasPizzaSizes ? selectedDough.price : 0
+
+  const unitPrice = basePrice + doughPrice + extrasPrice
+
   const totalPrice = unitPrice * quantity
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen || !product) return
+
+    const defaultSize = product.pizzaSizes?.[0]?.key ?? 'medium'
+
+    const savedSizeKey = initialValues?.selectedSizeKey as PizzaSizeKey | undefined
+
+    const savedDoughKey = initialValues?.selectedDoughKey as DoughKey | undefined
+
+    setSelectedSizeKey(savedSizeKey ?? defaultSize)
+    setSelectedDoughKey(savedDoughKey ?? 'regular')
 
     if (initialValues) {
       setSelectedExtraIds(initialValues.selectedExtraIds)
@@ -95,7 +175,7 @@ export default function ProductCustomizer() {
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [isOpen, product?.id, initialValues])
+  }, [isOpen, product, initialValues])
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -127,6 +207,14 @@ export default function ProductCustomizer() {
     setQuantity(current => current + 1)
   }
 
+  function getSizeName(sizeKey: PizzaSizeKey) {
+    if (sizeKey === 'medium') return text.medium
+    if (sizeKey === 'large') return text.large
+    if (sizeKey === 'xxl') return text.xxl
+
+    return text.deepPan
+  }
+
   function handleSave() {
     if (!product) return
 
@@ -136,11 +224,30 @@ export default function ProductCustomizer() {
       price: unitPrice,
       image: product.image,
       quantity,
+
       extras: selectedExtras.map(extra => ({
         id: extra.id,
         name: extra.translations[language],
         price: extra.price
       })),
+
+      pizzaSize:
+        hasPizzaSizes && selectedSize
+          ? {
+              key: selectedSize.key,
+              name: getSizeName(selectedSize.key),
+              diameter: selectedSize.diameter
+            }
+          : undefined,
+
+      dough: hasPizzaSizes
+        ? {
+            key: selectedDough.key,
+            name: selectedDough.translations[language],
+            price: selectedDough.price
+          }
+        : undefined,
+
       note: note.trim() || undefined
     }
 
@@ -172,12 +279,12 @@ export default function ProductCustomizer() {
         aria-hidden={!isOpen}
         aria-labelledby="product-customizer-title"
         className={`
-          fixed inset-x-0 bottom-0 z-[110] mx-auto flex max-h-[92vh]
-          w-full max-w-5xl flex-col overflow-hidden rounded-t-[30px]
-          border border-white/10 bg-[#0d0d0d]
+          fixed inset-x-0 bottom-0 z-[110] mx-auto flex
+          max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden
+          rounded-t-[30px] border border-white/10 bg-[#0d0d0d]
           shadow-[0_-30px_100px_rgba(0,0,0,.7)]
           transition-transform duration-300
-          lg:inset-y-1/2 lg:bottom-auto lg:max-h-[88vh]
+          lg:inset-y-1/2 lg:bottom-auto lg:max-h-[90vh]
           lg:-translate-y-1/2 lg:rounded-[30px]
           ${isOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-[calc(-50%+120vh)]'}
         `}
@@ -185,7 +292,7 @@ export default function ProductCustomizer() {
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-7">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[2.5px] text-[#d6b45e]">
-              {text.basePrice}: {product.price} kr
+              {text.from}: {product.price} kr
             </p>
 
             <h2 id="product-customizer-title" className="mt-1 font-serif text-2xl text-white sm:text-3xl">
@@ -214,7 +321,7 @@ export default function ProductCustomizer() {
               className="object-cover"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/10" />
 
             {product.badge && (
               <span className="absolute left-5 top-5 rounded-full border border-[#d6b45e]/60 bg-black/75 px-4 py-2 text-[10px] font-semibold uppercase tracking-[1.4px] text-[#d6b45e] backdrop-blur-md">
@@ -238,7 +345,86 @@ export default function ProductCustomizer() {
           </div>
 
           <div className="flex flex-col p-5 sm:p-7">
-            <div>
+            {hasPizzaSizes && (
+              <>
+                <div>
+                  <h3 className="font-serif text-2xl text-white">{text.sizeTitle}</h3>
+
+                  <p className="mt-2 text-sm leading-6 text-white/45">{text.sizeDescription}</p>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {product.pizzaSizes?.map(size => {
+                    const isSelected = selectedSize?.key === size.key
+
+                    return (
+                      <button
+                        key={size.key}
+                        type="button"
+                        onClick={() => setSelectedSizeKey(size.key)}
+                        aria-pressed={isSelected}
+                        className={`
+                          rounded-2xl border px-3 py-4 text-center
+                          transition
+                          ${
+                            isSelected
+                              ? 'border-[#d6b45e] bg-[#d6b45e]/10 shadow-[0_0_25px_rgba(214,180,94,.12)]'
+                              : 'border-white/10 bg-white/[0.025] hover:border-[#d6b45e]/50'
+                          }
+                        `}
+                      >
+                        <span className="block font-semibold uppercase text-white">{getSizeName(size.key)}</span>
+
+                        {size.diameter && (
+                          <span className="mt-1 block text-[10px] text-white/40">{size.diameter} cm</span>
+                        )}
+
+                        <span className="mt-2 block text-sm font-semibold text-[#d6b45e]">{size.price} kr</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-8">
+                  <h3 className="font-serif text-2xl text-white">{text.doughTitle}</h3>
+
+                  <p className="mt-2 text-sm leading-6 text-white/45">{text.doughDescription}</p>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  {doughOptions.map(dough => {
+                    const isSelected = selectedDough.key === dough.key
+
+                    return (
+                      <button
+                        key={dough.key}
+                        type="button"
+                        onClick={() => setSelectedDoughKey(dough.key)}
+                        aria-pressed={isSelected}
+                        className={`
+                          flex min-h-20 flex-col items-start
+                          justify-center rounded-2xl border px-4 py-3
+                          text-left transition
+                          ${
+                            isSelected
+                              ? 'border-[#d6b45e] bg-[#d6b45e]/10'
+                              : 'border-white/10 bg-white/[0.025] hover:border-[#d6b45e]/50'
+                          }
+                        `}
+                      >
+                        <span className="text-sm text-white/80">{dough.translations[language]}</span>
+
+                        <span className="mt-1 text-xs font-semibold text-[#d6b45e]">
+                          {dough.price === 0 ? text.included : `+${dough.price} kr`}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+
+            <div className={hasPizzaSizes ? 'mt-8' : ''}>
               <h3 className="font-serif text-2xl text-white">{text.extrasTitle}</h3>
 
               <p className="mt-2 text-sm leading-6 text-white/45">{text.extrasDescription}</p>
@@ -256,8 +442,9 @@ export default function ProductCustomizer() {
                       onClick={() => toggleExtra(extra.id)}
                       aria-pressed={isSelected}
                       className={`
-                        flex min-h-14 items-center justify-between gap-3
-                        rounded-2xl border px-4 py-3 text-left transition
+                        flex min-h-14 items-center justify-between
+                        gap-3 rounded-2xl border px-4 py-3
+                        text-left transition
                         ${
                           isSelected
                             ? 'border-[#d6b45e] bg-[#d6b45e]/10'
@@ -268,8 +455,8 @@ export default function ProductCustomizer() {
                       <div className="flex min-w-0 items-center gap-3">
                         <span
                           className={`
-                            flex h-6 w-6 shrink-0 items-center justify-center
-                            rounded-md border transition
+                            flex h-6 w-6 shrink-0 items-center
+                            justify-center rounded-md border transition
                             ${
                               isSelected
                                 ? 'border-[#d6b45e] bg-[#d6b45e] text-black'
@@ -349,7 +536,9 @@ export default function ProductCustomizer() {
               onClick={handleSave}
               className="mt-6 w-full rounded-2xl bg-[#d6b45e] px-6 py-4 font-semibold uppercase tracking-[2px] text-black transition hover:bg-[#efd27d] hover:shadow-[0_0_35px_rgba(214,180,94,.25)]"
             >
-              {isEditing ? text.updateCart : text.addToCart} · {totalPrice} kr
+              {isEditing ? text.updateCart : text.addToCart}
+              {' · '}
+              {totalPrice} kr
             </button>
           </div>
         </div>

@@ -1,15 +1,19 @@
 import { create } from 'zustand'
 
+import type { PizzaSizeOption } from '@/data/menuTypes'
+
 export type CustomizerProduct = {
   id: number
   name: string
   description: string
   price: number
+  menuPrice?: number
   image: string
   rating: number
   time: string
   badge?: string
   extraIngredientIds?: string[]
+  pizzaSizes?: PizzaSizeOption[]
 }
 
 export type CustomizerInitialValues = {
@@ -17,6 +21,9 @@ export type CustomizerInitialValues = {
   selectedExtraIds: string[]
   quantity: number
   note: string
+  selectedSizeKey?: string
+  selectedDoughKey?: string
+  selectedMealKey?: string
 }
 
 type ProductCustomizerStore = {

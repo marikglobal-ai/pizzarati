@@ -106,6 +106,8 @@ export default function BestSellers() {
                   badge={productText.badge}
                   addToCartLabel={text.addToCart}
                   extraIngredientIds={product.extraIngredientIds}
+                  pizzaSizes={product.pizzaSizes}
+                  menuPrice={product.menuPrice}
                 />
               )
             })}

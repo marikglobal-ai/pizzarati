@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 
+import type { PizzaSizeOption } from '@/data/menuTypes'
 import { useProductCustomizerStore } from '@/store/productCustomizerStore'
 
 type ProductCardProps = {
@@ -9,12 +10,14 @@ type ProductCardProps = {
   name: string
   description: string
   price: number
+  menuPrice?: number
   image: string
   rating: number
   time: string
   badge?: string
   addToCartLabel: string
   extraIngredientIds?: string[]
+  pizzaSizes?: PizzaSizeOption[]
 }
 
 export default function ProductCard({
@@ -22,12 +25,14 @@ export default function ProductCard({
   name,
   description,
   price,
+  menuPrice,
   image,
   rating,
   time,
   badge,
   addToCartLabel,
-  extraIngredientIds
+  extraIngredientIds,
+  pizzaSizes
 }: ProductCardProps) {
   const openCustomizer = useProductCustomizerStore(state => state.openCustomizer)
 
@@ -37,11 +42,13 @@ export default function ProductCard({
       name,
       description,
       price,
+      menuPrice,
       image,
       rating,
       time,
       badge,
-      extraIngredientIds
+      extraIngredientIds,
+      pizzaSizes
     })
   }
 
@@ -84,7 +91,11 @@ export default function ProductCard({
         </div>
 
         <div className="mt-7 flex items-center justify-between border-t border-white/10 pt-5">
-          <span className="text-2xl font-semibold text-white">{price} kr</span>
+          <div>
+            <p className="text-[10px] uppercase tracking-[1.5px] text-white/35">From</p>
+
+            <span className="text-2xl font-semibold text-white">{price} kr</span>
+          </div>
 
           <button
             type="button"

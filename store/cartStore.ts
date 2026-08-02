@@ -1,7 +1,20 @@
 import { create } from 'zustand'
+import type { PizzaSizeKey } from '@/data/menuTypes'
 
 export type CartExtra = {
   id: string
+  name: string
+  price: number
+}
+
+export type CartPizzaSize = {
+  key: PizzaSizeKey
+  name: string
+  diameter?: number
+}
+
+export type CartDough = {
+  key: string
   name: string
   price: number
 }
@@ -14,6 +27,8 @@ export type CartItem = {
   image: string
   quantity: number
   extras?: CartExtra[]
+  pizzaSize?: CartPizzaSize
+  dough?: CartDough
   note?: string
 }
 
@@ -46,9 +61,11 @@ function createCartId(product: CartItemInput) {
     .sort()
     .join('-')
 
+  const sizeKey = product.pizzaSize?.key ?? ''
+  const doughKey = product.dough?.key ?? ''
   const noteKey = product.note?.trim().toLowerCase() ?? ''
 
-  return `${product.id}-${extrasKey}-${noteKey}`
+  return `${product.id}-${sizeKey}-${doughKey}-${extrasKey}-${noteKey}`
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({

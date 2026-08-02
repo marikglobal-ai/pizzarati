@@ -19,11 +19,14 @@ const content = {
     editItem: 'Edit',
     decreaseItem: 'Decrease quantity',
     increaseItem: 'Increase quantity',
+    size: 'Size',
+    dough: 'Dough',
     extras: 'Extras',
     note: 'Note',
     total: 'Total',
     checkout: 'Checkout',
-    minutes: 'min'
+    minutes: 'min',
+    deepPan: 'Deep Pan'
   },
 
   da: {
@@ -36,11 +39,14 @@ const content = {
     editItem: 'Rediger',
     decreaseItem: 'Reducer antal',
     increaseItem: 'Øg antal',
+    size: 'Størrelse',
+    dough: 'Dej',
     extras: 'Ekstra',
     note: 'Bemærkning',
     total: 'I alt',
     checkout: 'Gå til betaling',
-    minutes: 'min'
+    minutes: 'min',
+    deepPan: 'Deep Pan'
   }
 } as const
 
@@ -77,15 +83,34 @@ export default function CartSidebar() {
         rating: product.rating,
         time: `${product.time} ${text.minutes}`,
         badge: productText.badge,
-        extraIngredientIds: product.extraIngredientIds
+        extraIngredientIds: product.extraIngredientIds,
+        pizzaSizes: product.pizzaSizes
       },
       {
         cartId: cartItem.cartId,
         selectedExtraIds: cartItem.extras?.map(extra => extra.id) ?? [],
         quantity: cartItem.quantity,
-        note: cartItem.note ?? ''
+        note: cartItem.note ?? '',
+        selectedSizeKey: cartItem.pizzaSize?.key,
+        selectedDoughKey: cartItem.dough?.key
       }
     )
+  }
+
+  function getSizeLabel(item: (typeof items)[number]) {
+    if (!item.pizzaSize) return null
+
+    if (item.pizzaSize.key === 'deepPan') {
+      return text.deepPan
+    }
+
+    const sizeName = item.pizzaSize.key === 'medium' ? 'M' : item.pizzaSize.key === 'large' ? 'L' : 'XXL'
+
+    if (item.pizzaSize.diameter) {
+      return `${sizeName} · ${item.pizzaSize.diameter} cm`
+    }
+
+    return sizeName
   }
 
   return (
@@ -136,96 +161,117 @@ export default function CartSidebar() {
             </div>
           ) : (
             <div className="space-y-4">
-              {items.map(item => (
-                <article
-                  key={item.cartId}
-                  className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:gap-4"
-                >
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl sm:h-24 sm:w-24">
-                    <Image src={item.image} alt={item.name} fill unoptimized sizes="96px" className="object-cover" />
-                  </div>
+              {items.map(item => {
+                const sizeLabel = getSizeLabel(item)
 
-                  <div className="flex min-w-0 flex-1 flex-col justify-between">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className="truncate font-serif text-lg text-white sm:text-xl">{item.name}</h3>
+                return (
+                  <article
+                    key={item.cartId}
+                    className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:gap-4"
+                  >
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl sm:h-24 sm:w-24">
+                      <Image src={item.image} alt={item.name} fill unoptimized sizes="96px" className="object-cover" />
+                    </div>
 
-                        <p className="mt-1 text-sm text-[#d6b45e]">{item.price} kr</p>
+                    <div className="flex min-w-0 flex-1 flex-col justify-between">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="truncate font-serif text-lg text-white sm:text-xl">{item.name}</h3>
 
-                        {item.extras && item.extras.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-[10px] font-semibold uppercase tracking-[1px] text-white/35">
-                              {text.extras}
+                          <p className="mt-1 text-sm text-[#d6b45e]">{item.price} kr</p>
+
+                          {(sizeLabel || item.dough) && (
+                            <div className="mt-2 space-y-1 text-xs text-white/50">
+                              {sizeLabel && (
+                                <p>
+                                  <span className="font-semibold text-white/65">{text.size}:</span> {sizeLabel}
+                                </p>
+                              )}
+
+                              {item.dough && (
+                                <p>
+                                  <span className="font-semibold text-white/65">{text.dough}:</span> {item.dough.name}
+                                  {item.dough.price > 0 ? ` (+${item.dough.price} kr)` : ''}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {item.extras && item.extras.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-[10px] font-semibold uppercase tracking-[1px] text-white/35">
+                                {text.extras}
+                              </p>
+
+                              <ul className="mt-1 space-y-1 text-xs text-white/50">
+                                {item.extras.map(extra => (
+                                  <li key={extra.id}>
+                                    + {extra.name} ({extra.price} kr)
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {item.note && (
+                            <p className="mt-2 text-xs leading-5 text-white/40">
+                              <span className="font-semibold text-white/55">{text.note}:</span> {item.note}
                             </p>
+                          )}
+                        </div>
 
-                            <ul className="mt-1 space-y-1 text-xs text-white/50">
-                              {item.extras.map(extra => (
-                                <li key={extra.id}>
-                                  + {extra.name} ({extra.price} kr)
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        <div className="flex shrink-0 items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleEditItem(item.cartId)}
+                            aria-label={`${text.editItem}: ${item.name}`}
+                            title={text.editItem}
+                            className="text-white/40 transition hover:text-[#d6b45e]"
+                          >
+                            <Pencil size={17} />
+                          </button>
 
-                        {item.note && (
-                          <p className="mt-2 text-xs leading-5 text-white/40">
-                            <span className="font-semibold text-white/55">{text.note}:</span> {item.note}
-                          </p>
-                        )}
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.cartId)}
+                            aria-label={`${text.removeItem}: ${item.name}`}
+                            title={text.removeItem}
+                            className="text-white/40 transition hover:text-red-400"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => handleEditItem(item.cartId)}
-                          aria-label={`${text.editItem}: ${item.name}`}
-                          title={text.editItem}
-                          className="text-white/40 transition hover:text-[#d6b45e]"
-                        >
-                          <Pencil size={17} />
-                        </button>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center rounded-full border border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => decreaseItem(item.cartId)}
+                            aria-label={`${text.decreaseItem}: ${item.name}`}
+                            className="flex h-9 w-9 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
+                          >
+                            <Minus size={15} />
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.cartId)}
-                          aria-label={`${text.removeItem}: ${item.name}`}
-                          title={text.removeItem}
-                          className="text-white/40 transition hover:text-red-400"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                          <span className="min-w-8 text-center text-sm text-white">{item.quantity}</span>
+
+                          <button
+                            type="button"
+                            onClick={() => increaseItem(item.cartId)}
+                            aria-label={`${text.increaseItem}: ${item.name}`}
+                            className="flex h-9 w-9 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
+                          >
+                            <Plus size={15} />
+                          </button>
+                        </div>
+
+                        <span className="shrink-0 font-semibold text-white">{item.price * item.quantity} kr</span>
                       </div>
                     </div>
-
-                    <div className="mt-3 flex items-center justify-between gap-3">
-                      <div className="flex items-center rounded-full border border-white/10">
-                        <button
-                          type="button"
-                          onClick={() => decreaseItem(item.cartId)}
-                          aria-label={`${text.decreaseItem}: ${item.name}`}
-                          className="flex h-9 w-9 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
-                        >
-                          <Minus size={15} />
-                        </button>
-
-                        <span className="min-w-8 text-center text-sm text-white">{item.quantity}</span>
-
-                        <button
-                          type="button"
-                          onClick={() => increaseItem(item.cartId)}
-                          aria-label={`${text.increaseItem}: ${item.name}`}
-                          className="flex h-9 w-9 items-center justify-center text-white/70 transition hover:text-[#d6b45e]"
-                        >
-                          <Plus size={15} />
-                        </button>
-                      </div>
-
-                      <span className="shrink-0 font-semibold text-white">{item.price * item.quantity} kr</span>
-                    </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                )
+              })}
             </div>
           )}
         </div>
